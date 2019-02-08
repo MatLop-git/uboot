@@ -40,8 +40,7 @@
 #define TS7970_EN_RTC		IMX_GPIO_NR(3, 23)
 #define TS7970_SCL		IMX_GPIO_NR(3, 21)
 #define TS7970_SDA		IMX_GPIO_NR(3, 28)
-#define TS7970_EN_5V		IMX_GPIO_NR(2, 22)
-#define TS7970_SEL_DC		IMX_GPIO_NR(5, 17)
+#define TS7970_EN_5V		IMX_GPIO_NR(5, 5)
 #define TS7970_SDBOOT		IMX_GPIO_NR(2, 26)
 #define TS7970_SPI_CS		IMX_GPIO_NR(3, 19)
 #define TS7970_PHY_RST		IMX_GPIO_NR(4, 20)
@@ -52,11 +51,13 @@
 #define TS7970_RGMII_RD3	IMX_GPIO_NR(6, 29)
 #define TS7970_RGMII_RX_CTL	IMX_GPIO_NR(6, 24)
 #define TS7970_EN_SDPWR		IMX_GPIO_NR(2, 28)
-#define TS7970_SCL		IMX_GPIO_NR(3, 21)
-#define TS7970_SDA		IMX_GPIO_NR(3, 28)
-#define TS7970_FPGARST		IMX_GPIO_NR(5, 20)
 #define TS7970_REVB		IMX_GPIO_NR(7, 1)
 #define TS7970_REVD		IMX_GPIO_NR(7, 0)
+#define TS7970_M2RESETN		IMX_GPIO_NR(2, 13)
+#define TS7970_POWER_FAIL_3V	IMX_GPIO_NR(1, 0)
+#define TS7970_EN_EMMC_POWERN	IMX_GPIO_NR(1, 7)
+#define TS7970_SCAP_JMP		IMX_GPIO_NR(1, 8)
+#define TS7970_M2PRESENTN	IMX_GPIO_NR(2, 18)
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -86,15 +87,22 @@ iomux_v3_cfg_t const ecspi1_pads[] = {
 
 iomux_v3_cfg_t const misc_pads[] = {
 	MX6_PAD_SD4_DAT3__GPIO2_IO11 | MUX_PAD_CTRL(NO_PAD_CTRL),	 // USB_HUB_RESET#
-	MX6_PAD_EIM_A16__GPIO2_IO22 | MUX_PAD_CTRL(NO_PAD_CTRL),	 // EN_USB_5V
+	MX6_PAD_DISP0_DAT11__GPIO5_IO05 | MUX_PAD_CTRL(NO_PAD_CTRL),	 // EN_USB_5V
 	MX6_PAD_EIM_RW__GPIO2_IO26 | MUX_PAD_CTRL(NO_PAD_CTRL),		 // JP_SD_BOOT#
-	MX6_PAD_DISP0_DAT23__GPIO5_IO17 | MUX_PAD_CTRL(NO_PAD_CTRL),	 // SEL_DC_USB#
-	MX6_PAD_EIM_D23__GPIO3_IO23 | MUX_PAD_CTRL(NO_PAD_CTRL),	 // EN_RTC_PWR#
-	MX6_PAD_GPIO_4__GPIO1_IO04 | MUX_PAD_CTRL(NO_PAD_CTRL),		 // FPGA_IRQ_1#
-	MX6_PAD_GPIO_3__XTALOSC_REF_CLK_24M | MUX_PAD_CTRL(NO_PAD_CTRL), // FPGA CLK
-	MX6_PAD_CSI0_DATA_EN__GPIO5_IO20 | MUX_PAD_CTRL(NO_PAD_CTRL),	 // FPGA_RESET
+	MX6_PAD_GPIO_4__GPIO1_IO04 | MUX_PAD_CTRL(NO_PAD_CTRL),		 // PUSH_SW_CPU#
+	MX6_PAD_GPIO_3__XTALOSC_REF_CLK_24M | MUX_PAD_CTRL(NO_PAD_CTRL), // HUB_24MHZ
 	MX6_PAD_SD3_DAT4__GPIO7_IO01 | MUX_PAD_CTRL(UART_PAD_CTRL),	 // REV B strap
 	MX6_PAD_SD3_DAT5__GPIO7_IO00 | MUX_PAD_CTRL(UART_PAD_CTRL),	 // REV C strap
+	MX6_PAD_SD4_DAT5__GPIO2_IO13 | MUX_PAD_CTRL(UART_PAD_CTRL),	 // M2_RESET#
+	MX6_PAD_GPIO_0__GPIO1_IO00 | MUX_PAD_CTRL(UART_PAD_CTRL),	 // POWER_FAIL_3V
+	MX6_PAD_GPIO_7__GPIO1_IO07 | MUX_PAD_CTRL(UART_PAD_CTRL),	 // EN_EMMC_POWER#
+	MX6_PAD_GPIO_8__GPIO1_IO08 | MUX_PAD_CTRL(UART_PAD_CTRL),	 // SCAP_JMP
+	MX6_PAD_EIM_A20__GPIO2_IO18 | MUX_PAD_CTRL(UART_PAD_CTRL),	 // M2_PRESENT#
+	MX6_PAD_DISP0_DAT14__GPIO5_IO08 | MUX_PAD_CTRL(NO_PAD_CTRL), 	 // R124
+	MX6_PAD_DISP0_DAT17__GPIO5_IO11 | MUX_PAD_CTRL(NO_PAD_CTRL), 	 // R123
+	MX6_PAD_DISP0_DAT18__GPIO5_IO12 | MUX_PAD_CTRL(NO_PAD_CTRL),	 // R122
+	MX6_PAD_DISP0_DAT22__GPIO5_IO16 | MUX_PAD_CTRL(NO_PAD_CTRL), 	 // R121
+	MX6_PAD_DISP0_DAT10__GPIO4_IO31 | MUX_PAD_CTRL(NO_PAD_CTRL), 	 // CN99_BOOT_SEL
 };
 
 /* SD card */
@@ -105,7 +113,7 @@ iomux_v3_cfg_t const usdhc2_pads[] = {
 	MX6_PAD_SD2_DAT1__SD2_DATA1	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
 	MX6_PAD_SD2_DAT2__SD2_DATA2	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
 	MX6_PAD_SD2_DAT3__SD2_DATA3	| MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX6_PAD_EIM_EB0__GPIO2_IO28 | MUX_PAD_CTRL(NO_PAD_CTRL), // EN_SD_POWER
+	MX6_PAD_EIM_EB0__GPIO2_IO28 | MUX_PAD_CTRL(NO_PAD_CTRL),	// EN_SD_POWER
 };
 
 /* MMC */
@@ -179,74 +187,6 @@ iomux_v3_cfg_t const i2c_pads[] = {
 	MX6_PAD_EIM_D28__GPIO3_IO28	| MUX_PAD_CTRL(I2C_PAD_CTRL),
 };
 
-#if defined(CONFIG_FPGA)
-
-iomux_v3_cfg_t const fpga_jtag_pads[] = {
-	MX6_PAD_DISP0_DAT14__GPIO5_IO08 | MUX_PAD_CTRL(NO_PAD_CTRL), 	// JTAG_FPGA_TMS
-	MX6_PAD_DISP0_DAT17__GPIO5_IO11 | MUX_PAD_CTRL(NO_PAD_CTRL), 	// JTAG_FPGA_TCK
-	MX6_PAD_DISP0_DAT18__GPIO5_IO12 | MUX_PAD_CTRL(NO_PAD_CTRL),	// JTAG_FPGA_TDO
-	MX6_PAD_DISP0_DAT22__GPIO5_IO16 | MUX_PAD_CTRL(NO_PAD_CTRL), 	// JTAG_FPGA_TDI
-};
-
-static void ts7970_jtag_init(void)
-{
-	imx_iomux_v3_setup_multiple_pads(fpga_jtag_pads,
-					 ARRAY_SIZE(fpga_jtag_pads));
-	gpio_direction_output(CONFIG_FPGA_TDI, 1);
-	gpio_direction_output(CONFIG_FPGA_TCK, 1);
-	gpio_direction_output(CONFIG_FPGA_TMS, 1);
-	gpio_direction_input(CONFIG_FPGA_TDO);
-	return;
-}
-
-static void ts7970_fpga_jtag_set_tdi(int value)
-{
-	gpio_set_value(CONFIG_FPGA_TDI, value);
-}
-
-static void ts7970_fpga_jtag_set_tms(int value)
-{
-	gpio_set_value(CONFIG_FPGA_TMS, value);
-}
-
-static void ts7970_fpga_jtag_set_tck(int value)
-{
-	gpio_set_value(CONFIG_FPGA_TCK, value);
-}
-
-static int ts7970_fpga_jtag_get_tdo(void)
-{
-	return gpio_get_value(CONFIG_FPGA_TDO);
-}
-
-lattice_board_specific_func ts7970_fpga_fns = {
-	ts7970_jtag_init,
-	ts7970_fpga_jtag_set_tdi,
-	ts7970_fpga_jtag_set_tms,
-	ts7970_fpga_jtag_set_tck,
-	ts7970_fpga_jtag_get_tdo
-};
-
-Lattice_desc ts7970_fpga = {
-	Lattice_XP2,
-	lattice_jtag_mode,
-	589012,
-	(void *) &ts7970_fpga_fns,
-	NULL,
-	0,
-	"machxo_2_cb132"
-};
-
-int ts7970_fpga_init(void)
-{
-	fpga_init();
-	fpga_add(fpga_lattice, &ts7970_fpga);
-
-	return 0;
-}
-
-#endif
-
 struct i2c_pads_info i2c_pad_info0 = {
 	.scl = {
 		.i2c_mode  = MX6_PAD_EIM_D21__I2C1_SCL | MUX_PAD_CTRL(I2C_PAD_CTRL),
@@ -259,29 +199,6 @@ struct i2c_pads_info i2c_pad_info0 = {
 		.gp = TS7970_SDA
 	}
 };
-
-char board_rev(void)
-{
-	static int rev = -1;
-
-	if(rev == -1) {
-		gpio_direction_input(TS7970_REVB);
-		/* REV C boards were never built */
-		gpio_direction_input(TS7970_REVD);
-
-		if(!gpio_get_value(TS7970_REVB)){
-			if(!gpio_get_value(TS7970_REVD)){
-				rev = 'D';
-			} else {
-				rev = 'B';
-			}
-		} else {
-			rev = 'A';
-		}
-	}
-
-	return (char)rev;
-}
 
 int board_spi_cs_gpio(unsigned bus, unsigned cs)
 {
@@ -307,15 +224,6 @@ static void setup_iomux_enet(void)
 {
 	// Assert reset
 	gpio_direction_output(TS7970_PHY_RST, 1);
-	if(board_rev() == 'A' || board_rev() == 'B') {
-		imx_iomux_v3_setup_multiple_pads(enet_pads1, ARRAY_SIZE(enet_pads1));
-		gpio_direction_output(TS7970_RGMII_RXC, 1);
-		gpio_direction_output(TS7970_RGMII_RD0, 1);
-		gpio_direction_output(TS7970_RGMII_RD1, 1);
-		gpio_direction_output(TS7970_RGMII_RD2, 1);
-		gpio_direction_output(TS7970_RGMII_RD3, 1);
-		gpio_direction_output(TS7970_RGMII_RX_CTL, 1);
-	}
 
 	/* Need delay at least 10ms according to KSZ9031 spec, and
 	 * per the 88E1512 on REV C and higher*/
@@ -397,68 +305,21 @@ int board_mmc_init(bd_t *bis)
 
 int board_phy_config(struct phy_device *phydev)
 {
-	if(board_rev() == 'A' || board_rev() == 'B') {
-		ksz9031_phy_extended_write(phydev, 0x2, 0x8, 0x8000, 0x3EF);
-		ksz9031_phy_extended_write(phydev, 0x0, 0x3, 0x8000, 0x1A80);
-		ksz9031_phy_extended_write(phydev, 0x0, 0x4, 0x8000, 0x0006);
-	} else {
-		/* reg page 0 */
-		phy_write(phydev, MDIO_DEVAD_NONE, 22, 0x0000);
-		/* Enable downshift after 1 try */
-		phy_write(phydev, MDIO_DEVAD_NONE, 16, 0x1860);
-		/* reg page 3 */
-		phy_write(phydev, MDIO_DEVAD_NONE, 22, 0x0003);
-		/* Change LED */
-		phy_write(phydev, MDIO_DEVAD_NONE, 16, 0x1017);
-		/* reset to reg page 0 */
-		phy_write(phydev, MDIO_DEVAD_NONE, 22, 0x0000);
-	}
+	/* reg page 0 */
+	phy_write(phydev, MDIO_DEVAD_NONE, 22, 0x0000);
+	/* Enable downshift after 1 try */
+	phy_write(phydev, MDIO_DEVAD_NONE, 16, 0x1860);
+	/* reg page 3 */
+	phy_write(phydev, MDIO_DEVAD_NONE, 22, 0x0003);
+	/* Change LED */
+	phy_write(phydev, MDIO_DEVAD_NONE, 16, 0x1017);
+	/* reset to reg page 0 */
+	phy_write(phydev, MDIO_DEVAD_NONE, 22, 0x0000);
 
 	if (phydev->drv->config)
 		phydev->drv->config(phydev); 
 
 	return 0;
-}
-
-void fixup_i2c(void)
-{
-	int i;
-
-	// EN RTC fet
-	gpio_direction_output(TS7970_EN_RTC, 0);
-
-	imx_iomux_v3_setup_multiple_pads(i2c_pads, ARRAY_SIZE(i2c_pads));
-	gpio_direction_input(TS7970_SCL);
-	gpio_direction_input(TS7970_SDA);
-
-	// On rare occasions the RTC misbehaves and drives the pins
-	// on i2c.  Turning off the fet prevents this condition
-	udelay(1000*2); // 2ms to turn on fet
-	for (i = 0; i < 5; i++)
-	{
-		if (gpio_get_value(TS7970_SCL) == 1 &&
-			gpio_get_value(TS7970_SDA) == 1)
-			break;
-		puts("Attempting to reset RTC\n");
-
-		// Drive I2C pins low
-		imx_iomux_v3_setup_pad(i2c_pad_info0.sda.gpio_mode);
-		imx_iomux_v3_setup_pad(i2c_pad_info0.scl.gpio_mode);
-		gpio_direction_output(i2c_pad_info0.sda.gp, 0);
-		gpio_direction_output(i2c_pad_info0.scl.gp, 0);
-
-		// Enable RTC FET
-		gpio_direction_output(TS7970_EN_RTC, 1);
-		udelay(1000*200); // at least 140ms to discharge
-		gpio_direction_output(TS7970_EN_RTC, 0);
-		udelay(1000*2); // 2ms to turn on
-
-		imx_iomux_v3_setup_pad(i2c_pad_info0.sda.i2c_mode);
-		imx_iomux_v3_setup_pad(i2c_pad_info0.scl.i2c_mode);
-
-		if(i == 4) puts ("Not able to force bus idle.  Giving up.\n");
-	}
-	setup_i2c(0, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c_pad_info0);
 }
 
 /*
@@ -482,11 +343,8 @@ int board_eth_init(bd_t *bis)
 	bus = fec_get_miibus(base, -1);
 	if (!bus)
 		return 0;
-	/* scan phy 4,5,6,7 */
-	if(board_rev() == 'A' || board_rev() == 'B')
-		phydev = phy_find_by_mask(bus, (0xf << 4), PHY_INTERFACE_MODE_RGMII);
-	else
-		phydev = phy_find_by_mask(bus, 0xf, PHY_INTERFACE_MODE_RGMII);	
+	
+	phydev = phy_find_by_mask(bus, 0xf, PHY_INTERFACE_MODE_RGMII);	
 
 	if (!phydev) {
 		free(bus);
@@ -549,14 +407,10 @@ int misc_init_r(void)
 
 	imx_iomux_v3_setup_multiple_pads(misc_pads, ARRAY_SIZE(misc_pads));
 
-	/* Pulse FPGA Reset */
-	gpio_direction_output(TS7970_FPGARST, 1);
-
 	// Turn off USB hub until hub is reset
 	// Set DC_SEL_USB to use usb on the standard header
 	gpio_direction_input(TS7970_SDBOOT);
 	gpio_direction_output(TS7970_EN_5V, 0);
-	gpio_direction_output(TS7970_SEL_DC, 0); // 0=USB A conn, 1=HD1
 	gpio_direction_output(TS7970_HUB_RESETN, 0); // hub only needs 1us
 	udelay(1);
 	gpio_set_value(TS7970_HUB_RESETN, 1);
@@ -566,19 +420,11 @@ int misc_init_r(void)
 	// gets a reset and power doesn't.  This *might* not be
 	// enough for some devices
 	udelay(10000); 
-	gpio_set_value(TS7970_FPGARST, 0); // Take FPGA out of reset
 	gpio_set_value(TS7970_EN_5V, 1);
 	sdboot = gpio_get_value(TS7970_SDBOOT);
 
 	if(sdboot) setenv("jpsdboot", "off");
 	else setenv("jpsdboot", "on");
-
-	i2c_read(0x28, 31, 2, val, 1);
-	if(val[0] & 0x4) {
-		setenv("pushsw", "off");
-	} else {
-		setenv("pushsw", "on");
-	}
 
 	/* PCIE does not get properly disabled from a watchdog reset.  This prevents 
 	 * a hang in the kernel if pcie was enabled in a previous boot. */
@@ -586,9 +432,6 @@ int misc_init_r(void)
 	clrbits_le32(&iomuxc_regs->gpr[1], IOMUXC_GPR1_REF_SSP_EN);
 
 	setenv_hex("reset_cause", get_imx_reset_cause());
-
-	i2c_read(0x28, 51, 2, val, 1);
-	printf("FPGA Rev: %d\n", val[0] >> 4);
 
 	i2c_read(0x10, 0, 0, val, 32);
 	printf("SilabRev: %d\n", val[31]);
@@ -598,7 +441,9 @@ int misc_init_r(void)
 
 int board_init(void)
 {
-	fixup_i2c();
+	imx_iomux_v3_setup_multiple_pads(i2c_pads, ARRAY_SIZE(i2c_pads));
+	setup_i2c(0, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c_pad_info0);
+
 	/* address of boot parameters */
 	gd->bd->bi_boot_params = PHYS_SDRAM + 0x100;
 
@@ -606,10 +451,6 @@ int board_init(void)
 
 	#ifdef CONFIG_CMD_SATA
 	setup_sata();
-	#endif
-
-	#ifdef CONFIG_FPGA
-	ts7970_fpga_init();
 	#endif
 
 	return 0;
@@ -622,13 +463,7 @@ int board_late_init(void)
 
 int checkboard(void)
 {
-	char rev = board_rev();
-
-	if(rev == 'D') {
-		printf("Board: TS-7970 REV D/E\n");
-	} else {
-		printf("Board: TS-7970 REV %c\n", rev);
-	}
+	printf("Board: Terumo\n");
 
 	return 0;
 }

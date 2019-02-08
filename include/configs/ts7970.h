@@ -204,14 +204,6 @@
 #define ENV_CPU_TYPE "cpu=dl\0"
 #endif
 
-#define CONFIG_PREBOOT \
-	"if test ${pushsw} = 'on'; then " \
-		"env set bootdelay -1;" \
-		"run usbprod;" \
-	"else " \
-		"env set bootdelay 0;" \
-	"fi" 
-
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"initrd_high=0xffffffff\0" \
 	"fdtaddr=0x18000000\0" \
@@ -219,8 +211,9 @@
 	"initrd_addr=0x10800000\0" \
 	ENV_IMX_TYPE \
 	ENV_CPU_TYPE \
-	"model=7970\0" \
+	"model=terumo\0" \
 	"autoload=no\0" \
+	"bootdelay=1\0" \
 	"disable_giga=1\0" \
 	"cmdline_append=console=ttymxc0,115200 rootwait ro init=/sbin/init\0" \
 	"clearenv=if sf probe; then " \
@@ -232,9 +225,6 @@
 			"then echo Booting from custom /boot/boot.ub;" \
 			"source ${loadaddr};" \
 		"fi;" \
-		"if load mmc 0:1 ${loadaddr} /boot/ts7970-fpga.vme;" \
-			"then fpga load 0 ${loadaddr} ${filesize};" \
-		"fi;" \
 		"load mmc 0:1 ${fdtaddr} /boot/imx6${cpu}-ts7970.dtb;" \
 		"load mmc 0:1 ${loadaddr} /boot/uImage;" \
 		"setenv bootargs root=/dev/mmcblk1p1 ${cmdline_append};" \
@@ -243,9 +233,6 @@
 		"if load mmc 1:1 ${loadaddr} /boot/boot.ub;" \
 			"then echo Booting from custom /boot/boot.ub;" \
 			"source ${loadaddr};" \
-		"fi;" \
-		"if load mmc 1:1 ${loadaddr} /boot/ts7970-fpga.vme;" \
-			"then fpga load 0 ${loadaddr} ${filesize};" \
 		"fi;" \
 		"load mmc 1:1 ${fdtaddr} /boot/imx6${cpu}-ts7970.dtb;" \
 		"load mmc 1:1 ${loadaddr} /boot/uImage;" \
@@ -256,9 +243,6 @@
 		"if load sata 0:1 ${loadaddr} /boot/boot.ub;" \
 			"then echo Booting from custom /boot/boot.ub;" \
 			"source ${loadaddr};" \
-		"fi;" \
-		"if load sata 0:1 ${loadaddr} /boot/ts7970-fpga.vme;" \
-			"then fpga load 0 ${loadaddr} ${filesize};" \
 		"fi;" \
 		"load sata 0:1 ${fdtaddr} /boot/imx6${cpu}-ts7970.dtb;" \
 		"load sata 0:1 ${loadaddr} /boot/uImage;" \
