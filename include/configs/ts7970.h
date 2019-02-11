@@ -225,7 +225,7 @@
 			"then echo Booting from custom /boot/boot.ub;" \
 			"source ${loadaddr};" \
 		"fi;" \
-		"load mmc 0:1 ${fdtaddr} /boot/imx6${cpu}-ts7970.dtb;" \
+		"load mmc 0:1 ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
 		"load mmc 0:1 ${loadaddr} /boot/uImage;" \
 		"setenv bootargs root=/dev/mmcblk1p1 ${cmdline_append};" \
 		"bootm ${loadaddr} - ${fdtaddr};\0" \
@@ -234,7 +234,7 @@
 			"then echo Booting from custom /boot/boot.ub;" \
 			"source ${loadaddr};" \
 		"fi;" \
-		"load mmc 1:1 ${fdtaddr} /boot/imx6${cpu}-ts7970.dtb;" \
+		"load mmc 1:1 ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
 		"load mmc 1:1 ${loadaddr} /boot/uImage;" \
 		"setenv bootargs root=/dev/mmcblk2p1 ${cmdline_append};" \
 		"bootm ${loadaddr} - ${fdtaddr};\0" \
@@ -244,7 +244,7 @@
 			"then echo Booting from custom /boot/boot.ub;" \
 			"source ${loadaddr};" \
 		"fi;" \
-		"load sata 0:1 ${fdtaddr} /boot/imx6${cpu}-ts7970.dtb;" \
+		"load sata 0:1 ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
 		"load sata 0:1 ${loadaddr} /boot/uImage;" \
 		"setenv bootargs root=/dev/sda1 rootwait ${cmdline_append};" \
 		"bootm ${loadaddr} - ${fdtaddr};\0" \
@@ -260,7 +260,7 @@
 		"fi;\0" \
 	"nfsboot=echo Booting from NFS ...;" \
 		"dhcp;" \
-		"nfs ${fdtaddr} ${nfsroot}/boot/imx6${cpu}-ts7970.dtb;" \
+		"nfs ${fdtaddr} ${nfsroot}/boot/imx6${cpu}-tsterumo.dtb;" \
 		"nfs ${loadaddr} ${nfsroot}/boot/uImage;" \
 		"setenv bootargs root=/dev/nfs ip=dhcp nfsroot=${nfsroot} " \
 			"${cmdline_append};" \
