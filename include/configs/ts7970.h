@@ -290,7 +290,7 @@
 #define CONFIG_BOOTCOMMAND \
 	"if test ${jpsdboot} = 'on';" \
 		"then run sdboot;" \
-		"else run emmcboot;" \
+		"else run sataboot;" \
 	"fi;"
 
 /* Miscellaneous configurable options */
