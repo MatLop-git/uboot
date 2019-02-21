@@ -436,6 +436,16 @@ int misc_init_r(void)
 	i2c_read(0x10, 0, 0, val, 32);
 	printf("SilabRev: %d\n", val[31]);
 
+	/* Initialize to disabled for a reset.  script calls will re-enable
+	 * if needed */
+	disable_supercaps();
+	gpio_direction_input(TS7970_SCAP_JMP);
+	if (gpio_get_value(TS7970_SCAP_JMP)) {
+		setenv("jpchrg", "1");
+	} else {
+		setenv("jpchrg", "0");
+	}
+
 	return 0;
 }
 

@@ -204,6 +204,9 @@
 #define ENV_CPU_TYPE "cpu=dl\0"
 #endif
 
+#define CONFIG_PREBOOT \
+	"run prechargesilo;"
+
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"initrd_high=0xffffffff\0" \
 	"fdtaddr=0x18000000\0" \
@@ -212,10 +215,24 @@
 	ENV_IMX_TYPE \
 	ENV_CPU_TYPE \
 	"model=terumo\0" \
+	"silopresent=1\0" \
+	"silochargpct=85\0" \
 	"autoload=no\0" \
 	"bootdelay=1\0" \
 	"disable_giga=1\0" \
 	"cmdline_append=console=ttymxc0,115200 rootwait ro init=/sbin/init\0" \
+	"prechargesilo=if test $silopresent = '1';" \
+		"then echo 'Supercaps are present';" \
+		"if test $jpchrg = '0';" \
+			"then echo 'No Charge jumper on, skipping charging';" \
+			"else tsmicroctl e;"\
+		"fi;" \
+	"fi;\0" \
+	"chargesilo=if test $silopresent = '1';" \
+		"then if test $jpchrg != '0';" \
+			"then tsmicroctl b ${silochargpct};"\
+		"fi;" \
+	"fi;\0" \
 	"clearenv=if sf probe; then " \
 		"sf erase 0x100000 0x2000;" \
 		"sf erase 0x180000 0x2000;" \
@@ -227,7 +244,8 @@
 		"fi;" \
 		"load mmc 0:1 ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
 		"load mmc 0:1 ${loadaddr} /boot/uImage;" \
-		"setenv bootargs root=/dev/mmcblk1p1 ${cmdline_append};" \
+		"setenv bootargs root=/dev/mmcblk1p1 ${cmdline_append} ts-silo=${silopresent};" \
+		"run chargesilo;" \
 		"bootm ${loadaddr} - ${fdtaddr};\0" \
 	"emmcboot=echo Booting from the eMMC ...;" \
 		"if load mmc 1:1 ${loadaddr} /boot/boot.ub;" \
@@ -236,7 +254,8 @@
 		"fi;" \
 		"load mmc 1:1 ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
 		"load mmc 1:1 ${loadaddr} /boot/uImage;" \
-		"setenv bootargs root=/dev/mmcblk2p1 ${cmdline_append};" \
+		"setenv bootargs root=/dev/mmcblk2p1 ${cmdline_append} ts-silo=${silopresent};" \
+		"run chargesilo;" \
 		"bootm ${loadaddr} - ${fdtaddr};\0" \
 	"sataboot=echo Booting from SATA ...;" \
 		"sata init;" \
@@ -246,7 +265,8 @@
 		"fi;" \
 		"load sata 0:1 ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
 		"load sata 0:1 ${loadaddr} /boot/uImage;" \
-		"setenv bootargs root=/dev/sda1 rootwait ${cmdline_append};" \
+		"setenv bootargs root=/dev/sda1 rootwait ${cmdline_append} ts-silo=${silopresent};" \
+		"run chargesilo;" \
 		"bootm ${loadaddr} - ${fdtaddr};\0" \
 	"usbprod=usb start;" \
 		"if usb storage;" \
@@ -263,7 +283,8 @@
 		"nfs ${fdtaddr} ${nfsroot}/boot/imx6${cpu}-tsterumo.dtb;" \
 		"nfs ${loadaddr} ${nfsroot}/boot/uImage;" \
 		"setenv bootargs root=/dev/nfs ip=dhcp nfsroot=${nfsroot} " \
-			"${cmdline_append};" \
+			"${cmdline_append} ts-silo=${silopresent};" \
+		"run chargesilo;" \
 		"bootm ${loadaddr} - ${fdtaddr}; \0"
 
 #define CONFIG_BOOTCOMMAND \
