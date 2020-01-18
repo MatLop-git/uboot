@@ -22,8 +22,6 @@
 /* Avoid Mender specific code if we are just probing for configuration. */
 #ifndef MENDER_AUTO_PROBING
 
-#include <config_mender_defines.h>
-
 #ifdef CONFIG_ENV_IS_NOWHERE
 # error A CONFIG_ENV_IS_IN_<storage-type> define is required for Mender to work. For standard Mender setups this should be CONFIG_ENV_IS_IN_MMC for HD/SSD/MMC/SD storage setup, and CONFIG_ENV_IS_IN_UBI for Flash/UBI storage.
 #endif

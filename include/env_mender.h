@@ -24,8 +24,6 @@
 #define MENDER_ENV_SETTINGS
 #else
 
-#include <config_mender_defines.h>
-
 #ifdef MENDER_NO_DEFAULT_ALTBOOTCMD
 # define MENDER_DEFAULT_ALTBOOTCMD
 #else
