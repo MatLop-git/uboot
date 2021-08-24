@@ -8,6 +8,8 @@
 
 #include <common.h>
 
+#include <asm/arch-mx6/sys_proto.h>
+#include <asm/arch-imx/cpu.h>
 #include <asm/arch/mx6-pins.h>
 #include <asm/gpio.h>
 #include <asm/imx-common/gpio.h>
@@ -207,13 +209,12 @@ int wifi_test(void)
 	return ret;
 }
 
-/* Check for ISL12020 */
+/* Check for m41t000 rtc */
 int rtc_test(void)
 {
 	int ret;
 
-	ret = i2c_probe(0x57);
-	ret |= i2c_probe(0x6f);
+	ret = i2c_probe(0x68);
 
 	if (ret == 0) printf("RTC test passed\n");
 	else printf("RTC test failed\n");
@@ -282,42 +283,10 @@ uint16_t rscale(uint16_t data, uint16_t r1, uint16_t r2)
 
 int silabs_test(void)
 {
-	uint16_t data[16];
 	uint8_t tmp[32];
 	int ret;
-	int i;
 
 	ret = i2c_read(0x10, 0, 0, tmp, 32);
-	for (i = 0; i <= 15; i++)
-		data[i] = (tmp[i*2] << 8) | tmp[(i*2)+1];
-
-	/* 5V_A is between 4.5 and 5.5 VDC */
-	if(rscale(data[8], 147, 107) > 5500 ||
-	   rscale(data[8], 147, 107) < 4500) {
-		printf("Bad 5V_A rail voltage, %dmV\n", rscale(data[8], 147, 107));
-		ret = 1;
-	}
-
-	/* 3.1V is between 2.8 and 3.3 VDC */
-	if(rscale(data[9], 499, 499) < 2800 ||
-	   rscale(data[9], 499, 499) > 3300) {
-		printf("Bad 3.1V rail voltage, %dmV\n", rscale(data[9], 499, 499));
-		ret = 1;
-	}
-
-	/* DDR_1.5V is between 1.3 and 1.7 VDC */
-	if(sscale(data[10]) < 1300 ||
-	   sscale(data[10]) > 1700)	{
-		printf("Bad DDR_1.5VDC, %dmV\n", sscale(data[10]));
-		ret = 1;
-	}
-
-	/* 3.3V is between 3.0 and 3.6 VDC */
-	if(rscale(data[14], 499, 499) < 3000 ||
-	   rscale(data[14], 499, 499) > 3600) {
-		printf("Bad 3.3 VDC, %dmV\n", rscale(data[14], 499, 499));
-		ret = 1;
-	}
 
 	if (ret == 0) printf("Silabs test passed\n");
 	else printf("Silabs test failed\n");
@@ -350,31 +319,102 @@ void leds_test(void)
 	yellow_led_on();
 }
 
-static int silab_rev(void)
-{
-	uint8_t val[32];
-	i2c_read(0x10, 0, 0, val, 32);
-	return val[31];
-}
+#define EIM_PAD_CTRL (PAD_CTL_HYS | PAD_CTL_PUS_100K_UP |			\
+	PAD_CTL_SPEED_LOW | PAD_CTL_SPEED_MED  | PAD_CTL_DSE_240ohm)
 
-static int fpga_rev(void)
+iomux_v3_cfg_t const eim_pads[] = {
+	MX6_PAD_CSI0_DAT12__EIM_DATA08 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_CSI0_DAT13__EIM_DATA09 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_CSI0_DAT14__EIM_DATA10 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_CSI0_DAT15__EIM_DATA11 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_CSI0_DAT16__EIM_DATA12 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_CSI0_DAT17__EIM_DATA13 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_CSI0_DAT18__EIM_DATA14 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_CSI0_DAT19__EIM_DATA15 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA0__EIM_AD00 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA1__EIM_AD01 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA2__EIM_AD02 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA3__EIM_AD03 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA4__EIM_AD04 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA5__EIM_AD05 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA6__EIM_AD06 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA7__EIM_AD07 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA8__EIM_AD08 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA9__EIM_AD09 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA10__EIM_AD10 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA11__EIM_AD11 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA12__EIM_AD12 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA13__EIM_AD13 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA14__EIM_AD14 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_DA15__EIM_AD15 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_A16__EIM_ADDR16 | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_OE__EIM_OE_B | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_RW__EIM_RW | MUX_PAD_CTRL(EIM_PAD_CTRL),
+	MX6_PAD_EIM_CS0__EIM_CS0_B | MUX_PAD_CTRL(EIM_PAD_CTRL),
+};
+
+#define EIM_CS0 0x08000000
+#define MRAM_SIZE (1 << 17)
+
+static int mram_test(void)
 {
-	uint8_t val;
-	i2c_read(0x28, 51, 2, &val, 1);
-	return (val & 0xf0) >> 4;
+	int ret = 0;
+	uint8_t wbuf[MRAM_SIZE];
+	uint8_t rbuf;
+	uint8_t *base = (uint8_t *)EIM_CS0;
+	int i;
+	struct weim *weim_regs = (struct weim *)0x21B8000;
+
+	/* ungate clock */
+	writel(readl(0x020c4080) | 0xC00, 0x020c4080);
+
+	imx_iomux_v3_setup_multiple_pads(eim_pads, ARRAY_SIZE(eim_pads));
+
+	writel(0x00150031, &weim_regs->cs0gcr1);
+	writel(0x00000000, &weim_regs->cs0gcr2);
+	writel(0x08000000, &weim_regs->cs0rcr1);
+	writel(0x00000000, &weim_regs->cs0rcr2);
+	writel(0x08000000, &weim_regs->cs0wcr1);
+	writel(0x00000000, &weim_regs->cs0wcr2);
+	
+	set_chipselect_size(CS0_128);
+
+	srand(0);
+	for (i = 0; i < MRAM_SIZE; i++) {
+		wbuf[i] = (uint8_t)rand();
+		base[i] = wbuf[i];
+	}
+ 
+	for (i = 0; i < MRAM_SIZE; i++) {
+		rbuf = base[i];
+		if(wbuf[i] != rbuf){
+			fprintf(stderr, "At offset %d, expected 0x%X, got 0x%X\n", i, wbuf[i], rbuf);
+			ret = 1;
+			break;
+		}
+	}
+
+	if (ret == 0) printf("MRAM test passed\n");
+	else printf("MRAM test failed\n");
+
+	return ret;
 }
+/* peekpoke 32 0x020C401C 0x900800
+*/
 
 static int do_post_test(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	int ret = 0;
-	int build_variant = 0;
-	int opt_r37;
-	int opt_r36;
-	int opt_r34;
-	int opt_r39;
-	uint8_t val;
 
 	leds_test();
+
+	ret |= mram_test();
+	ret |= marvell_phy_test();
+	ret |= emmc_test();
+	ret |= mem_test();
+	ret |= silabs_test();
+	ret |= rtc_test();
+	ret |= usbhub_test();
 
 	if (ret == 0) printf("All POST tests passed\n");
 	else printf("One or more POST tests failed\n");
