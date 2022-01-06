@@ -18,6 +18,7 @@
 #include <command.h>
 #include <i2c.h>
 #include <status_led.h>
+#include <spi_flash.h>
 #include <usb.h>
 
 #include <miiphy.h>
@@ -402,6 +403,37 @@ static int mram_test(void)
 /* peekpoke 32 0x020C401C 0x900800
 */
 
+static int ts9471_test(void)
+{
+	struct spi_flash *flash;
+	uint32_t buf;
+	int ret = 0;
+
+	gpio_direction_output(IMX_GPIO_NR(4, 31), 0); /* Select offboard */
+	flash = spi_flash_probe(0, 0, 15000000, 0);
+	spi_flash_read(flash, 0x90000, 4, &buf);
+	if(buf != 0xdeadbeef) {
+		printf("Expected offboard flash 0xDEADBEEF, got 0x%X\n", buf);
+		ret = 1;
+	}
+
+	gpio_direction_output(IMX_GPIO_NR(4, 31), 1); /* Select onboard */
+	flash = spi_flash_probe(0, 0, 15000000, 0);
+	spi_flash_read(flash, 0x90000, 4, &buf);
+	if(buf == 0xdeadbeef) {
+		printf("Onboard flash returned sentry value, mux failure\n");
+		ret = 1;
+	}
+
+	/* set back to default offboard */
+	gpio_direction_output(IMX_GPIO_NR(4, 31), 0);
+
+	if (ret == 0) printf("TS9471 test passed\n");
+	else printf("TS9471 test failed\n");
+
+	return ret;
+}
+
 static int do_post_test(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	int ret = 0;
@@ -415,6 +447,7 @@ static int do_post_test(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[
 	ret |= silabs_test();
 	ret |= rtc_test();
 	ret |= usbhub_test();
+	ret |= ts9471_test();
 
 	if (ret == 0) printf("All POST tests passed\n");
 	else printf("One or more POST tests failed\n");
