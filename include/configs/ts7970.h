@@ -238,34 +238,34 @@
 		"sf erase 0x180000 0x2000;" \
 		"echo restored environment to factory default; fi\0" \
 	"sdboot=echo Booting from the SD card ...;" \
-		"if load mmc 0:1 ${loadaddr} /boot/boot.ub;" \
+		"if load ${mender_uboot_root} ${loadaddr} /boot/boot.ub;" \
 			"then echo Booting from custom /boot/boot.ub;" \
 			"source ${loadaddr};" \
 		"fi;" \
-		"load mmc 0:1 ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
-		"load mmc 0:1 ${loadaddr} /boot/uImage;" \
-		"setenv bootargs root=/dev/mmcblk1p1 ${cmdline_append} ts-silo=${silopresent};" \
+		"load ${mender_uboot_root} ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
+		"load ${mender_uboot_root} ${loadaddr} /boot/uImage;" \
+		"setenv bootargs root=${mender_uboot_root_name} ${cmdline_append} ts-silo=${silopresent};" \
 		"run chargesilo;" \
 		"bootm ${loadaddr} - ${fdtaddr};\0" \
 	"emmcboot=echo Booting from the eMMC ...;" \
-		"if load mmc 1:1 ${loadaddr} /boot/boot.ub;" \
+		"if load ${mender_uboot_root} ${loadaddr} /boot/boot.ub;" \
 			"then echo Booting from custom /boot/boot.ub;" \
 			"source ${loadaddr};" \
 		"fi;" \
-		"load mmc 1:1 ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
-		"load mmc 1:1 ${loadaddr} /boot/uImage;" \
-		"setenv bootargs root=/dev/mmcblk2p1 ${cmdline_append} ts-silo=${silopresent};" \
+		"load ${mender_uboot_root} ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
+		"load ${mender_uboot_root} ${loadaddr} /boot/uImage;" \
+		"setenv bootargs root=${mender_uboot_root_name} ${cmdline_append} ts-silo=${silopresent};" \
 		"run chargesilo;" \
 		"bootm ${loadaddr} - ${fdtaddr};\0" \
 	"sataboot=echo Booting from SATA ...;" \
 		"sata init;" \
-		"if load sata 0:1 ${loadaddr} /boot/boot.ub;" \
+		"if load ${mender_uboot_root} ${loadaddr} /boot/boot.ub;" \
 			"then echo Booting from custom /boot/boot.ub;" \
 			"source ${loadaddr};" \
 		"fi;" \
-		"load sata 0:1 ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
-		"load sata 0:1 ${loadaddr} /boot/uImage;" \
-		"setenv bootargs root=/dev/sda1 rootwait ${cmdline_append} ts-silo=${silopresent};" \
+		"load ${mender_uboot_root} ${fdtaddr} /boot/imx6${cpu}-tsterumo.dtb;" \
+		"load ${mender_uboot_root} ${loadaddr} /boot/uImage;" \
+		"setenv bootargs root=${mender_uboot_root_name} rootwait ${cmdline_append} ts-silo=${silopresent};" \
 		"run chargesilo;" \
 		"bootm ${loadaddr} - ${fdtaddr};\0" \
 	"usbprod=usb start;" \
@@ -288,6 +288,7 @@
 		"bootm ${loadaddr} - ${fdtaddr}; \0"
 
 #define CONFIG_BOOTCOMMAND \
+	"run mender_setup;" \
 	"run usbprod;" \
 	"if test ${jpsdboot} = 'on';" \
 		"then run sdboot;" \
@@ -365,5 +366,66 @@
 
 #define CONFIG_CMD_BOOTZ
 #define CONFIG_SUPPORT_RAW_INITRD
+
+/* Support for Mender */
+#define CONFIG_BOOTCOUNT_LIMIT
+#define CONFIG_BOOTCOUNT_ENV
+
+#define MENDER_BOOT_PART_NUMBER				0
+#define MENDER_BOOT_PART_NUMBER_HEX			0
+#define MENDER_ROOTFS_PART_A_NUMBER			1
+#define MENDER_ROOTFS_PART_A_NUMBER_HEX			1
+#define MENDER_ROOTFS_PART_B_NUMBER			2
+#define MENDER_ROOTFS_PART_B_NUMBER_HEX			2
+
+/* Is this a problem is not booting from eMMC? */
+#define MENDER_UBOOT_ENV_STORAGE_DEVICE_OFFSET_1	CONFIG_ENV_OFFSET
+#define MENDER_UBOOT_ENV_STORAGE_DEVICE_OFFSET_2	CONFIG_ENV_OFFSET_REDUND
+
+/* Change this depending on boot source for using Mender! */
+#define SD 1
+#define EMMC 2
+#define SATA 3
+#define TERUMO_BOOT_SOURCE	SD
+
+#if TERUMO_BOOT_SOURCE == SD
+/* Set up for SD card */
+#define MENDER_STORAGE_DEVICE_BASE			"/dev/mmcblk1p"
+#define MENDER_ROOTFS_PART_A_NAME			"/dev/mmcblk1p1"
+#define MENDER_ROOTFS_PART_B_NAME			"/dev/mmcblk1p2"
+#define MENDER_UBOOT_STORAGE_INTERFACE			"mmc"
+#define MENDER_UBOOT_STORAGE_DEVICE			0
+
+#elif TERUMO_BOOT_SOURCE == EMMC
+/* Set up for eMMC */
+#define MENDER_STORAGE_DEVICE_BASE			"/dev/mmcblk2p"
+#define MENDER_ROOTFS_PART_A_NAME			"/dev/mmcblk2p1"
+#define MENDER_ROOTFS_PART_B_NAME			"/dev/mmcblk2p2"
+#define MENDER_UBOOT_STORAGE_INTERFACE			"mmc"
+#define MENDER_UBOOT_STORAGE_DEVICE			1
+
+#elif TERUMO_BOOT_SOURCE == SATA
+/* Set up for SATA */
+#define MENDER_STORAGE_DEVICE_BASE			"/dev/sda"
+#define MENDER_ROOTFS_PART_A_NAME			"/dev/sda1"
+#define MENDER_ROOTFS_PART_B_NAME			"/dev/sda2"
+#define MENDER_UBOOT_STORAGE_INTERFACE			"sata"
+#define MENDER_UBOOT_STORAGE_DEVICE			0
+
+#else
+#error "Must correctly set TERUMO_BOOT_SOURCE macro!"
+#endif
+
+
+
+#define MENDER_BOOTENV_SIZE				CONFIG_ENV_SIZE
+#define MENDER_BOOT_KERNEL_TYPE				"bootm"
+#define MENDER_KERNEL_NAME				"uImage"
+#define MENDER_DTB_NAME					"imx6${cpu}-tsterumo.dtb"
+
+#define MENDER_UBOOT_PRE_SETUP_COMMANDS			""
+#define MENDER_UBOOT_POST_SETUP_COMMANDS		""
+
+
 
 #endif /*__TS7990_CONFIG_H */
